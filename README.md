@@ -1,14 +1,13 @@
 # PCA Visualization & Download Modules
 
-## Project Overview
+## Module Overview
 This project provides a **Visualization Module** and a **Download Module** for exploring Principal Component Analysis (PCA) results.  
 
 It allows users to:
 
 - Generate **Variance Explained Plots** (Bar + Cumulative Line)
 - Generate **PCA Scatter Plots** (2D/3D)
-- Optionally visualize **Original vs Reconstructed Images** (side-by-side)
-
+  
 Currently, the modules use **dummy data** for demonstration. Actual datasets or images should be provided by other parts of the project.
 
 ---
@@ -41,4 +40,5 @@ Currently, the modules use **dummy data** for demonstration. Actual datasets or 
 ├─ Download_module.py # Script to fetch and save plots
 ├─ .gitignore # Ignore generated images, JSON, and virtual env
 ├─ README.md # Project documentation
-└─ Requirements.txt # Python dependencies
+├─ Requirements.txt # Python dependencies
+└─ templates which in turn contains index.html  #UI for downloading the images
