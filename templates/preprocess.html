@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RIDRT - Preprocessing Module</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 RGB Image Dimensionality Reduction Tool</h1>
+    <p class="subtitle">Preprocessing Module — Upload CSV, Excel, or Image files</p>
+
+    <!-- Upload Area -->
+    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">📁</div>
+        <div class="upload-text">Click to upload or drag and drop</div>
+        <div class="upload-hint">
+          Supported formats: CSV, XLSX, JPG, PNG (Max 16MB)
+        </div>
+        <input type="file" name="file" id="fileInput" accept=".csv,.xlsx,.jpg,.jpeg,.png" required>
+      </div>
+
+      <div class="action-buttons">
+        <button type="submit" class="btn btn-primary" id="runBtn" disabled>Run Preprocessing</button>
+        <button type="button" class="btn btn-secondary" id="clearBtn">Clear</button>
+      </div>
+    </form>
+
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Processing file...</p>
+    </div>
+
+    <!-- Status Messages -->
+    <div class="status" id="status"></div>
+
+    <!-- Results Section -->
+    <div class="results" id="results">
+      {% if table_original %}
+      <div class="status status-success show">
+        File processed successfully ✅
+      </div>
+
+      <h2>📊 Original Data (First 5 Rows)</h2>
+      {{ table_original | safe }}
+
+      <h2>📈 Normalized Data (First 5 Rows)</h2>
+      {{ table_normalized | safe }}
+
+      {% elif image_path %}
+      <div class="status status-success show">
+        Image processed successfully ✅
+      </div>
+
+      <h2>🖼️ Processed Image</h2>
+      <img src="{{ image_path }}" alt="Processed Image" class="image-preview">
+      <p>Vectorized Shape: {{ shape }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const form = document.getElementById('uploadForm');
+    const loading = document.getElementById('loading');
+    const statusBox = document.getElementById('status');
+    const resultsBox = document.getElementById('results');
+    const runBtn = document.getElementById('runBtn');
+    const clearBtn = document.getElementById('clearBtn');
+
+    // ---- Drag and Drop Handling ----
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      uploadArea.classList.add('drag-over');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadArea.classList.remove('drag-over');
+      if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        runBtn.disabled = false;
+        showStatus("File selected: " + e.dataTransfer.files[0].name, "info");
+      }
+    });
+
+    // ---- Enable Submit Button when File Selected ----
+    fileInput.addEventListener('change', () => {
+      runBtn.disabled = !fileInput.files.length;
+      if (fileInput.files.length) {
+        showStatus("File selected: " + fileInput.files[0].name, "info");
+      }
+    });
+
+    // ---- Show Loading Spinner ----
+    form.addEventListener('submit', () => {
+      loading.classList.add('show');
+      showStatus("Processing started...", "info");
+    });
+
+    // ---- Clear Button ----
+    clearBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      fileInput.value = '';
+      runBtn.disabled = true;
+      loading.classList.remove('show');
+      uploadArea.classList.remove('drag-over', 'disabled');
+      resultsBox.innerHTML = '';
+      showStatus("Cleared successfully.", "success");
+    });
+
+    // ---- Helper: Status Message ----
+    function showStatus(message, type) {
+      statusBox.textContent = message;
+      statusBox.className = 'status show status-' + type;
+      setTimeout(() => {
+        statusBox.classList.remove('show');
+      }, 4000);
+    }
+  </script>
+</body>
+</html>
+
