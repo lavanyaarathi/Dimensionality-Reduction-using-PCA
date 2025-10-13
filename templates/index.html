@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,3 +87,505 @@ function downloadFile(url, filename) {
 </script>
 </body>
 </html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIDRT - File Upload Module</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f8f9ff;
+        }
+
+        .upload-area.drag-over {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-area.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .upload-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .upload-text {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-hint {
+            color: #666;
+            font-size: 14px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-item-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-icon {
+            font-size: 32px;
+        }
+
+        .file-details h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .file-details p {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .file-type-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-tabular {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-image {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .status {
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .session-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #856404;
+            display: none;
+        }
+
+        .session-info.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 RGB Image Dimensionality Reduction Tool</h1>
+        <p class="subtitle">File Upload Module - Upload CSV, Excel, or Image files for PCA processing</p>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <div class="upload-text">Click to upload or drag and drop</div>
+            <div class="upload-hint">Supported formats: CSV, XLSX, XLS, JPG, PNG (Max 16MB)</div>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls,.jpg,.jpeg,.png">
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing file...</p>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="session-info" id="sessionInfo">
+            <strong>Session ID:</strong> <span id="sessionId"></span>
+        </div>
+
+        <div class="file-info" id="fileInfo"></div>
+
+        <div class="action-buttons">
+            <button class="btn btn-secondary" id="clearBtn" style="display:none;">Clear Files</button>
+            <button class="btn btn-primary" id="nextBtn" style="display:none;">Proceed to PCA →</button>
+        </div>
+    </div>
+
+    <script>
+        class FileUploadModule {
+            constructor() {
+                this.sessionId = null;
+                this.uploadedFiles = [];
+                this.initElements();
+                this.attachEventListeners();
+                this.createSession();
+            }
+
+            initElements() {
+                this.uploadArea = document.getElementById('uploadArea');
+                this.fileInput = document.getElementById('fileInput');
+                this.loading = document.getElementById('loading');
+                this.status = document.getElementById('status');
+                this.fileInfo = document.getElementById('fileInfo');
+                this.sessionInfo = document.getElementById('sessionInfo');
+                this.sessionIdSpan = document.getElementById('sessionId');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+            }
+
+            attachEventListeners() {
+                // Click to upload
+                this.uploadArea.addEventListener('click', () => {
+                    if (!this.uploadArea.classList.contains('disabled')) {
+                        this.fileInput.click();
+                    }
+                });
+
+                // File input change
+                this.fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        this.handleFileUpload(e.target.files[0]);
+                    }
+                });
+
+                // Drag and drop
+                this.uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (!this.uploadArea.classList.contains('disabled')) {
+                        this.uploadArea.classList.add('drag-over');
+                    }
+                });
+
+                this.uploadArea.addEventListener('dragleave', () => {
+                    this.uploadArea.classList.remove('drag-over');
+                });
+
+                this.uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.uploadArea.classList.remove('drag-over');
+                    
+                    if (!this.uploadArea.classList.contains('disabled') && e.dataTransfer.files.length > 0) {
+                        this.handleFileUpload(e.dataTransfer.files[0]);
+                    }
+                });
+
+                // Button handlers
+                this.clearBtn.addEventListener('click', () => this.clearFiles());
+                this.nextBtn.addEventListener('click', () => this.proceedToPCA());
+            }
+
+            async createSession() {
+                try {
+                    const response = await fetch('/api/session/create', {
+                        method: 'POST'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.sessionId = data.session_id;
+                        this.sessionIdSpan.textContent = this.sessionId.substring(0, 8) + '...';
+                        this.sessionInfo.classList.add('show');
+                        this.showStatus('Session created successfully', 'info');
+                    }
+                } catch (error) {
+                    this.showStatus('Failed to create session: ' + error.message, 'error');
+                }
+            }
+
+            async handleFileUpload(file) {
+                // Validate file size
+                const maxSize = 16 * 1024 * 1024; // 16MB
+                if (file.size > maxSize) {
+                    this.showStatus('File size exceeds 16MB limit', 'error');
+                    return;
+                }
+
+                // Show loading
+                this.loading.classList.add('show');
+                this.uploadArea.classList.add('disabled');
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('session_id', this.sessionId);
+
+                try {
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.uploadedFiles.push(data.file_info);
+                        this.showStatus(data.message, 'success');
+                        this.displayFiles();
+                        this.clearBtn.style.display = 'block';
+                        this.nextBtn.style.display = 'block';
+                    } else {
+                        this.showStatus('Upload failed: ' + data.error, 'error');
+                    }
+                } catch (error) {
+                    this.showStatus('Upload error: ' + error.message, 'error');
+                } finally {
+                    this.loading.classList.remove('show');
+                    this.uploadArea.classList.remove('disabled');
+                    this.fileInput.value = ''; // Reset input
+                }
+            }
+
+            displayFiles() {
+                this.fileInfo.innerHTML = '<h3 style="margin-bottom: 15px; color: #333;">Uploaded Files</h3>';
+                
+                this.uploadedFiles.forEach((file, index) => {
+                    const fileIcon = file.file_type === 'image' ? '🖼️' : '📊';
+                    const badgeClass = file.file_type === 'image' ? 'badge-image' : 'badge-tabular';
+                    
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div class="file-item-left">
+                            <div class="file-icon">${fileIcon}</div>
+                            <div class="file-details">
+                                <h3>${file.filename}</h3>
+                                <p>${file.validation_message}</p>
+                            </div>
+                        </div>
+                        <span class="file-type-badge ${badgeClass}">${file.file_type}</span>
+                    `;
+                    this.fileInfo.appendChild(fileItem);
+                });
+
+                this.fileInfo.classList.add('show');
+            }
+
+            showStatus(message, type) {
+                this.status.textContent = message;
+                this.status.className = 'status show status-' + type;
+                
+                setTimeout(() => {
+                    this.status.classList.remove('show');
+                }, 5000);
+            }
+
+            async clearFiles() {
+                if (!confirm('Are you sure you want to clear all uploaded files?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/session/${this.sessionId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        this.uploadedFiles = [];
+                        this.fileInfo.classList.remove('show');
+                        this.clearBtn.style.display = 'none';
+                        this.nextBtn.style.display = 'none';
+                        this.showStatus('Files cleared successfully', 'success');
+                        
+                        // Create new session
+                        await this.createSession();
+                    }
+                } catch (error) {
+                    this.showStatus('Failed to clear files: ' + error.message, 'error');
+                }
+            }
+
+            proceedToPCA() {
+                this.showStatus('Ready to proceed to PCA module (to be implemented)', 'info');
+                // Integration point for next module
+                console.log('Session ID:', this.sessionId);
+                console.log('Uploaded files:', this.uploadedFiles);
+            }
+        }
+
+        // Initialize the module
+        const fileUploadModule = new FileUploadModule();
+    </script>
+</body>
+</html>
+>>>>>>> c8a06b4896f6b17c2f031465154aa52db814529b
