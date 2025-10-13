@@ -6,7 +6,8 @@ Integrates File Upload and Preprocessing Modules
 from flask import Flask, render_template
 from config import Config
 from routes.upload_routes import upload_bp
-from routes.preprocessing_routes import preprocessing_bp
+from routes.preprocessing_routes import preprocess_bp
+
 from utils.cleanup import start_cleanup_thread
 import os
 
@@ -20,7 +21,7 @@ def create_app(config_class=Config):
     
     # Register blueprints
     app.register_blueprint(upload_bp)
-    app.register_blueprint(preprocessing_bp)
+    app.register_blueprint(preprocess_bp)
     
     # Start background cleanup thread
     start_cleanup_thread()

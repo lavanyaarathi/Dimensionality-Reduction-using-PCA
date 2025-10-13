@@ -1,15 +1,17 @@
+# routes/upload_routes.py
+
 from flask import Blueprint, request, jsonify
 from werkzeug.utils import secure_filename
 import os
 
-# Fixed imports after merging
-from modules.preprocessing_module import PreprocessingModule
+# Fix the import to match your actual module name
+from modules.preprocessing import PreprocessingModule
 from modules.session_manager import session_manager
 from modules.upload_handler import FileUploadHandler
 from modules.validators import FileValidator, ValidationFactory
-# Create blueprint
+
+
 upload_bp = Blueprint('upload', __name__, url_prefix='/api')
-preprocessor = PreprocessingModule()
 
 @upload_bp.route('/session/create', methods=['POST'])
 def create_session():
