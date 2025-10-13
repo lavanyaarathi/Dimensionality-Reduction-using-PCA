@@ -1,11 +1,9 @@
-<<<<<<< HEAD
-numpy>=1.24.0
-=======
-
 Flask==3.0.0
 Werkzeug==3.0.1
 pandas==2.1.4
 numpy==1.26.2
 Pillow==10.1.0
 openpyxl==3.1.2
->>>>>>> c8a06b4896f6b17c2f031465154aa52db814529b
+scikit-learn==1.3.0
+matplotlib==3.8.0
+plotly==5.18.0

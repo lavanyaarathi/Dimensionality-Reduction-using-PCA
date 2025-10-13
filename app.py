@@ -1,19 +1,17 @@
+"""
+Main Flask Application for RIDRT
+Integrates File Upload and Preprocessing Modules
+"""
+
 from flask import Flask, render_template
 from config import Config
 from routes.upload_routes import upload_bp
+from routes.preprocessing_routes import preprocessing_bp
 from utils.cleanup import start_cleanup_thread
 import os
 
 def create_app(config_class=Config):
-    """
-    Application factory pattern for Flask app creation
-    
-    Args:
-        config_class: Configuration class to use
-        
-    Returns:
-        Flask application instance
-    """
+    """Application factory pattern"""
     app = Flask(__name__)
     app.config.from_object(config_class)
     
@@ -22,6 +20,7 @@ def create_app(config_class=Config):
     
     # Register blueprints
     app.register_blueprint(upload_bp)
+    app.register_blueprint(preprocessing_bp)
     
     # Start background cleanup thread
     start_cleanup_thread()
@@ -34,7 +33,6 @@ def create_app(config_class=Config):
     
     return app
 
-# Create application instance
 app = create_app()
 
 if __name__ == '__main__':
