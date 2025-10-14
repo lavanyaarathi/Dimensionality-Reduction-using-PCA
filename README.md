@@ -1,7 +1,7 @@
 # 🧠 Dimensionality Reduction Using PCA
 
 ## 🎯 Project Overview
-This project implements a **modular AI-assisted system** for performing **Dimensionality Reduction using Principal Component Analysis (PCA)** on both **tabular** and **image** datasets.
+This project implements a **modular system** for performing **Dimensionality Reduction using Principal Component Analysis (PCA)** on both **tabular** and **image** datasets.
 
 It provides an **end-to-end preprocessing and analysis pipeline**, enabling users to:
 - Upload data (CSV, Excel, JPG, PNG)
