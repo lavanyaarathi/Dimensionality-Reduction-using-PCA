@@ -16,14 +16,14 @@ It provides an **end-to-end preprocessing and analysis pipeline**, enabling user
 The project follows a **modular architecture** with a **Flask backend** and **React frontend**, ensuring scalability, reusability, and clean separation of components.
 
 ### **Architecture Diagram**
-Frontend (React)
-│
-▼
-Backend (Flask)
-├── Upload Module
-├── Preprocessing Module
-├── PCA Module
-└── Visualization Module
+Frontend (React)<br>
+│<br>
+▼<br>
+Backend (Flask)<br>
+├── Upload Module<br>
+├── Preprocessing Module<br>
+├── PCA Module<br>
+└── Visualization Module<br>
 
 Each backend module is encapsulated within its own Flask **Blueprint** and operates independently or in coordination with others.
 
@@ -79,12 +79,12 @@ Generates graphical outputs and visual insights.
 
 ## 🧱 Backend Routes Structure
 
-routes/
-│
-├── upload_routes.py → Handles file uploads
-├── preprocessing_routes.py → Manages preprocessing requests
-├── pca_routes.py → Executes PCA computation
-└── visualization_routes.py → Returns generated PCA plots
+routes/<br>
+│<br>
+├── upload_routes.py → Handles file uploads<br>
+├── preprocessing_routes.py → Manages preprocessing requests<br>
+├── pca_routes.py → Executes PCA computation<br>
+└── visualization_routes.py → Returns generated PCA plots<br>
 
 
 Each route is registered as a Flask **Blueprint** in `app.py`.
