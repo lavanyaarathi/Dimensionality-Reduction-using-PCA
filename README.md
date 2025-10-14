@@ -1,5 +1,5 @@
 # Dimensionality Reduction using PCA
-##1. File Upload Module
+## 1. File Upload Module
 ### Module Overview
 Overview
 The File Upload Module provides a robust, secure, and modular system for handling file uploads in the RIDRT application. It supports multiple file formats (CSV, Excel, Images) with comprehensive validation, session management, and automatic cleanup.
@@ -13,7 +13,7 @@ The File Upload Module provides a robust, secure, and modular system for handlin
 ✅ Background Cleanup - Automatic deletion of expired sessions
 
 
-## 1. PCA Visualization & Download Modules
+## 3. PCA Visualization & Download Modules
 
 ### Module Overview
 This project provides a **Visualization Module** and a **Download Module** for exploring Principal Component Analysis (PCA) results.  
