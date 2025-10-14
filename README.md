@@ -1,17 +1,30 @@
 # Dimensionality Reduction using PCA
 ## 1. File Upload Module
 ### Module Overview
-Overview
+
 The File Upload Module provides a robust, secure, and modular system for handling file uploads in the RIDRT application. It supports multiple file formats (CSV, Excel, Images) with comprehensive validation, session management, and automatic cleanup.
 ### Key Features
--✅ Multi-Format Support - CSV, Excel (XLSX/XLS), Images (JPG/PNG)
--✅ Comprehensive Validation - File type, size, content, and structure validation
--✅ Session Management - Isolated user sessions with automatic cleanup
--✅ Security - Filename sanitization, size limits, extension validation
--✅ Modular Architecture - Easy to extend and maintain
--✅ RESTful API - Clean API endpoints for all operations
--✅ Background Cleanup - Automatic deletion of expired sessions
+✅ Multi-Format Support - CSV, Excel (XLSX/XLS), Images (JPG/PNG)<br>
+✅ Comprehensive Validation - File type, size, content, and structure validation<br>
+✅ Session Management - Isolated user sessions with automatic cleanup<br>
+✅ Security - Filename sanitization, size limits, extension validation<br>
+✅ Modular Architecture - Easy to extend and maintain<br>
+✅ RESTful API - Clean API endpoints for all operations<br>
+✅ Background Cleanup - Automatic deletion of expired sessions<br>
 
+---
+## 2. Preprocessing Module
+### Module Overview
+The Preprocessing Module provides comprehensive data preprocessing capabilities for both tabular and image data. It operates as a standalone module, handling normalization, missing values, outlier detection, quality analysis, and data transformations required for PCA computation.
+
+### Key Features
+✅ Dual Data Support - Tabular (CSV/Excel) and Image (JPG/PNG) preprocessing<br>
+✅ Flexible Strategies - Multiple options for handling missing values and normalization<br>
+✅ Quality Analysis - Built-in data quality checking and profiling<br>
+✅ Modular Design - Easy to extend with custom preprocessors<br>
+✅ Standalone Operation - Works independently or integrates with other modules<br>
+✅ Batch Processing - Handle multiple files efficiently<br>
+✅ Comprehensive Utilities - Outlier detection, transformations, augmentation<br>
 ---
 ## 3. PCA Visualization & Download Modules
 
