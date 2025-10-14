@@ -1,7 +1,21 @@
-# Python cache
 __pycache__/
 *.pyc
-
-# Generated plots and JSON outputs
-*.png
+*.pyo
+*.pyd
+venv/
+env/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+uploads/
+temp_uploads/
+*.tmp
+*.log
+!sample_data/
+!sample_data/*.png
+!sample_data/*.csv
 *.json
+*.npy
+*.npz
+checkpoints/
