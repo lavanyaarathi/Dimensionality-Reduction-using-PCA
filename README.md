@@ -1,177 +1,145 @@
-# Dimensionality Reduction using PCA
-## 1. File Upload Module
-### Module Overview
+# 🧠 Dimensionality Reduction Using PCA
 
-The File Upload Module provides a robust, secure, and modular system for handling file uploads in the RIDRT application. It supports multiple file formats (CSV, Excel, Images) with comprehensive validation, session management, and automatic cleanup.
-### Key Features
-✅ Multi-Format Support - CSV, Excel (XLSX/XLS), Images (JPG/PNG)<br>
-✅ Comprehensive Validation - File type, size, content, and structure validation<br>
-✅ Session Management - Isolated user sessions with automatic cleanup<br>
-✅ Security - Filename sanitization, size limits, extension validation<br>
-✅ Modular Architecture - Easy to extend and maintain<br>
-✅ RESTful API - Clean API endpoints for all operations<br>
-✅ Background Cleanup - Automatic deletion of expired sessions<br>
+## 🎯 Project Overview
+This project implements a **modular AI-assisted system** for performing **Dimensionality Reduction using Principal Component Analysis (PCA)** on both **tabular** and **image** datasets.
 
----
-## 2. Preprocessing Module
-### Module Overview
-The Preprocessing Module provides comprehensive data preprocessing capabilities for both tabular and image data. It operates as a standalone module, handling normalization, missing values, outlier detection, quality analysis, and data transformations required for PCA computation.
-
-### Key Features
-✅ Dual Data Support - Tabular (CSV/Excel) and Image (JPG/PNG) preprocessing<br>
-✅ Flexible Strategies - Multiple options for handling missing values and normalization<br>
-✅ Quality Analysis - Built-in data quality checking and profiling<br>
-✅ Modular Design - Easy to extend with custom preprocessors<br>
-✅ Standalone Operation - Works independently or integrates with other modules<br>
-✅ Batch Processing - Handle multiple files efficiently<br>
-✅ Comprehensive Utilities - Outlier detection, transformations, augmentation<br>
----
-## 3. PCA Visualization & Download Modules
-
-### Module Overview
-This project provides a **Visualization Module** and a **Download Module** for exploring Principal Component Analysis (PCA) results.  
-
-It allows users to:
-
-- Generate **Variance Explained Plots** (Bar + Cumulative Line)
-- Generate **PCA Scatter Plots** (2D/3D)
-  
-Currently, the modules use **dummy data** for demonstration. Actual datasets or images should be provided by other parts of the project.
+It provides an **end-to-end preprocessing and analysis pipeline**, enabling users to:
+- Upload data (CSV, Excel, JPG, PNG)
+- Clean and normalize datasets
+- Perform PCA transformations
+- Visualize reduced dimensions interactively
 
 ---
 
-### Features
+## ⚙️ System Architecture
 
-#### Visualization Module
-- Flask-based web service
-- Endpoints:
-  - /visualize/variance → Returns variance plots in PNG and Plotly JSON
-  - /visualize/scatter → Returns PCA scatter plots in PNG and Plotly JSON
-  - /visualize/image → Combines original and reconstructed images (if provided)
-  - /visualize/variance_download → Downloadable variance plot as PNG
-  - /visualize/scatter_download → Downloadable scatter plot as PNG
+The project follows a **modular architecture** with a **Flask backend** and **React frontend**, ensuring scalability, reusability, and clean separation of components.
 
-#### Download Module
-- Python script to fetch plots from the visualization server
-- Generates:
-  - variance_plot.png
-  - scatter_plot.json (or PNG if configured)
-- Can simulate 2D/3D scatter plots with dummy data
-
----
-
-### Project Structure
-
-/project-root
+### **Architecture Diagram**
+Frontend (React)
 │
-├─ Visualization_module.py # Flask server for plotting
-├─ Download_module.py # Script to fetch and save plots
-├─ .gitignore # Ignore generated images, JSON, and virtual env
-├─ README.md # Project documentation
-├─ Requirements.txt # Python dependencies
-└─ templates which in turn contains index.html  #UI for downloading the images
+▼
+Backend (Flask)
+├── Upload Module
+├── Preprocessing Module
+├── PCA Module
+└── Visualization Module
 
-## 2. PCA Computation and Result Generation Modules
-
-**Author:** Siddhi Dhawale (231IT072)  
-**Project:** RGB Image Dimensionality Reduction Tool (RIDRT)  
-**Course:** Software Engineering  
-**Date:** September-October 2025
+Each backend module is encapsulated within its own Flask **Blueprint** and operates independently or in coordination with others.
 
 ---
 
-### Overview
+## 🧩 Modules Overview
 
-This module implements the core PCA (Principal Component Analysis) computation and result generation functionality for the RIDRT project. It provides dimensionality reduction capabilities for both tabular datasets and RGB images.
+### 1️⃣ Upload Module
+Handles file uploads and input validation.
 
-#### Module Responsibilities (per SDD v1.0)
-
-**PCA Computation Module (`pca_computation.py`)**
-- Compute covariance matrix from normalized data
-- Perform eigendecomposition
-- Select top-k principal components (user-defined or variance-based)
-- Project data into reduced subspace
-
-**Result Generation Module (`result_generation.py`)**
-- Reconstruct images from reduced representation
-- Prepare transformed datasets
-- Calculate explained variance ratio
-- Calculate reconstruction error (MSE)
+**Key Features**
+- Supports CSV, Excel, JPG, PNG formats  
+- Validates data type and structure  
+- Stores uploaded data securely  
+- Integrates directly with preprocessing pipeline  
 
 ---
 
-### Installation
+### 2️⃣ Preprocessing Module
+Provides comprehensive preprocessing capabilities for both tabular and image data.
 
-#### Python Environment
+**Key Features**
+- ✅ **Dual Data Support** – Tabular (CSV/Excel) and Image (JPG/PNG) preprocessing  
+- ✅ **Flexible Strategies** – Multiple options for handling missing values and normalization  
+- ✅ **Quality Analysis** – Built-in data quality checking and profiling  
+- ✅ **Modular Design** – Easy to extend with custom preprocessors  
+- ✅ **Standalone Operation** – Works independently or integrates with other modules  
+- ✅ **Batch Processing** – Handles multiple files efficiently  
+- ✅ **Comprehensive Utilities** – Outlier detection, transformations, augmentation  
 
-It is recommended to create and activate a virtual environment before installing the required libraries:
+---
 
+### 3️⃣ PCA Module
+Applies **Principal Component Analysis** to preprocessed data.
+
+**Key Features**
+- Computes principal components and explained variance  
+- Reduces dimensionality for visualization and analysis  
+- Supports both 2D and 3D PCA transformations  
+- Exports reduced datasets for further modeling  
+
+---
+
+### 4️⃣ Visualization Module
+Generates graphical outputs and visual insights.
+
+**Key Features**
+- PCA scatter plots and variance ratio charts  
+- Integration with Plotly / Matplotlib for interactive displays  
+- Exports plots for reports or dashboards  
+
+---
+
+## 🧱 Backend Routes Structure
+
+routes/
+│
+├── upload_routes.py → Handles file uploads
+├── preprocessing_routes.py → Manages preprocessing requests
+├── pca_routes.py → Executes PCA computation
+└── visualization_routes.py → Returns generated PCA plots
+
+
+Each route is registered as a Flask **Blueprint** in `app.py`.
+
+---
+
+## 🧮 Workflow Summary
+
+1. 🗂️ **Upload** dataset (CSV, Excel, JPG, or PNG)  
+2. 🧹 **Preprocessing** – clean, normalize, and handle missing data  
+3. 📉 **PCA Computation** – reduce data dimensions  
+4. 📊 **Visualization** – display transformed results interactively  
+
+---
+
+## 🚀 Key Highlights
+
+- 🔹 Modular and extensible Flask architecture  
+- 🔹 Works for both **tabular and image** data  
+- 🔹 Clean API endpoints for integration  
+- 🔹 Scalable for large dataset handling  
+- 🔹 Easy visualization and export options  
+
+---
+
+## 🧰 Tech Stack
+
+| Layer | Technology |
+|-------|-------------|
+| **Frontend** | React.js , HTML , CSS|
+| **Backend** | Flask (Python) |
+| **Data Processing** | NumPy, Pandas, OpenCV, Scikit-learn |
+| **Visualization** | Matplotlib / Plotly |
+| **File Handling** | Flask-Uploads, Pandas |
+| **Environment** | Python 3.10+, Node.js, npm |
+
+---
+
+## 🪜 Setup Instructions
+
+### 🔧 Backend and Frontend  Setup
 ```bash
-# Create a virtual environment
+# Clone repository
+git clone https://github.com/<your-username>/Dimensionality-Reduction-using-PCA.git
+cd Dimensionality-Reduction-using-PCA
+
+# Create virtual environment
 python -m venv venv
+venv\Scripts\activate  # on Windows
+source venv/bin/activate  # on macOS/Linux
 
-# Activate the environment
-# On Windows:
-venv\Scripts\activate
-# On Linux/macOS:
-source venv/bin/activate
+# Install dependencies
+pip install -r requirements.txt
 
-# Install required libraries
-pip install numpy 
+# Run Flask app
+python app.py
+
 ```
-
-#### Directory Structure
-```
-pca_result/
-├── __init__.py
-├── pca_computation.py
-├── result_generation.py
-└── sample_data/
-    ├── iris.csv
-    └── flower.png
-├── download_datasets.py
-├── requirements.txt
-├── Readme.md
-└── test_my_modules.py
-```
-
----
-
-### Quick Start
-
-#### Download Datasets
-
-Run this script to download actual datasets:
-
-```bash
-python download_datasets.py
-```
-
-This downloads:
-- **iris.csv** - Famous Iris dataset from UCI (150 samples, 4 features)
-- **flower.png** - Sample image of a flower
-
----
-
-### Testing
-
-Run this script to test the modules:
-
-```bash
-python test_my_modules.py
-```
-
----
-
-### Error Handling
-
-The modules include comprehensive input validation:
-
-```python
-# These will raise ValueError with helpful messages:
-run_pca(data_norm, k=0)  # k must be positive
-run_pca(data_norm, k=100)  # k exceeds feature count
-run_pca(data_norm, variance_threshold=1.5)  # must be 0-1
-run_pca(data_norm)  # must provide k OR variance_threshold
-```
-
