@@ -7,6 +7,8 @@ from flask import Flask, render_template
 from config import Config
 from routes.upload_routes import upload_bp
 from routes.preprocessing_routes import preprocess_bp
+from routes.visualization_routes import visualization_bp
+from routes.pca_routes import pca_bp
 
 from utils.cleanup import start_cleanup_thread
 import os
@@ -22,6 +24,8 @@ def create_app(config_class=Config):
     # Register blueprints
     app.register_blueprint(upload_bp)
     app.register_blueprint(preprocess_bp)
+    app.register_blueprint(visualization_bp)
+    app.register_blueprint(pca_bp)
     
     # Start background cleanup thread
     start_cleanup_thread()

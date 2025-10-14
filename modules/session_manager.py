@@ -22,6 +22,7 @@ class Session:
         self.created_at = datetime.now()
         self.last_accessed = datetime.now()
         self.files = []
+        self.pca_results = {}
     
     def update_access_time(self):
         """Update the last accessed timestamp"""
@@ -44,6 +45,18 @@ class Session:
             list: List of file information dictionaries
         """
         return self.files
+
+    def set_pca_result(self, filename, result_dict):
+        """
+        Store PCA results for a given filename in this session.
+        """
+        self.pca_results[filename] = result_dict
+
+    def get_pca_result(self, filename):
+        """
+        Retrieve PCA results for a given filename.
+        """
+        return self.pca_results.get(filename)
     
     def is_expired(self):
         """

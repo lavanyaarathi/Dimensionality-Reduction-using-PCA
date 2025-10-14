@@ -1,99 +1,9 @@
-<<<<<<< HEAD
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RIDRT - Download Module</title>
-<style>
-* {margin:0; padding:0; box-sizing:border-box;}
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.container {
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    max-width: 800px;
-    width: 100%;
-    padding: 40px;
-}
-h1 {color: #333; margin-bottom: 10px; font-size:28px;}
-.subtitle {color:#666; margin-bottom:30px; font-size:14px;}
-.file-item {
-    display: flex;
-    align-items:center;
-    justify-content: space-between;
-    padding:15px;
-    background:white;
-    border-radius:8px;
-    margin-bottom:10px;
-    box-shadow:0 2px 4px rgba(0,0,0,0.1);
-}
-.file-item h3 {margin:0; font-size:16px; color:#333;}
-.btn {padding:12px 24px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition: all 0.3s ease;}
-.btn-primary {background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white;}
-.btn-primary:hover {transform: translateY(-2px);}
-</style>
-</head>
-<body>
-<div class="container">
-    <h1>📥 Download Module</h1>
-    <p class="subtitle">Download generated plots for PCA visualization</p>
-
-    <div id="fileList"></div>
-</div>
-
-<script>
-const files = [
-    { name: "variance_plot.png", url: "http://127.0.0.1:5000/visualize/variance_download" },
-    { name: "scatter_plot.png", url: "http://127.0.0.1:5000/visualize/scatter_download" }
-];
-
-const fileList = document.getElementById('fileList');
-
-files.forEach(file => {
-    const fileDiv = document.createElement('div');
-    fileDiv.className = 'file-item';
-    fileDiv.innerHTML = `
-        <h3>${file.name}</h3>
-        <button class="btn btn-primary" onclick="downloadFile('${file.url}', '${file.name}')">Download</button>
-    `;
-    fileList.appendChild(fileDiv);
-});
-
-function downloadFile(url, filename) {
-    fetch(url)
-        .then(resp => {
-            if (!resp.ok) throw new Error("Network response was not ok");
-            return resp.blob();
-        })
-        .then(blob => {
-            const link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        })
-        .catch(err => alert('Download failed: ' + err));
-}
-</script>
-</body>
-</html>
-=======
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RIDRT - File Upload Module</title>
+    <title>RIDRT - File Upload & Visualization</title>
     <style>
         * {
             margin: 0;
@@ -364,7 +274,7 @@ function downloadFile(url, filename) {
 <body>
     <div class="container">
         <h1>🎨 RGB Image Dimensionality Reduction Tool</h1>
-        <p class="subtitle">File Upload Module - Upload CSV, Excel, or Image files for PCA processing</p>
+        <p class="subtitle">Upload files and download PCA visualizations</p>
 
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📁</div>
@@ -388,7 +298,8 @@ function downloadFile(url, filename) {
 
         <div class="action-buttons">
             <button class="btn btn-secondary" id="clearBtn" style="display:none;">Clear Files</button>
-            <button class="btn btn-primary" id="nextBtn" style="display:none;">Proceed to PCA →</button>
+            <button class="btn btn-primary" id="varianceBtn" style="display:none;">Download Variance Plot</button>
+            <button class="btn btn-primary" id="scatterBtn" style="display:none;">Download Scatter Plot</button>
         </div>
     </div>
 
@@ -411,7 +322,10 @@ function downloadFile(url, filename) {
                 this.sessionInfo = document.getElementById('sessionInfo');
                 this.sessionIdSpan = document.getElementById('sessionId');
                 this.clearBtn = document.getElementById('clearBtn');
-                this.nextBtn = document.getElementById('nextBtn');
+                this.varianceBtn = document.getElementById('varianceBtn');
+                this.scatterBtn = document.getElementById('scatterBtn');
+                this.varianceBtn.disabled = true;
+                this.scatterBtn.disabled = true;
             }
 
             attachEventListeners() {
@@ -452,7 +366,8 @@ function downloadFile(url, filename) {
 
                 // Button handlers
                 this.clearBtn.addEventListener('click', () => this.clearFiles());
-                this.nextBtn.addEventListener('click', () => this.proceedToPCA());
+                this.varianceBtn.addEventListener('click', () => this.downloadVariance());
+                this.scatterBtn.addEventListener('click', () => this.downloadScatter());
             }
 
             async createSession() {
@@ -503,7 +418,17 @@ function downloadFile(url, filename) {
                         this.showStatus(data.message, 'success');
                         this.displayFiles();
                         this.clearBtn.style.display = 'block';
-                        this.nextBtn.style.display = 'block';
+                        this.varianceBtn.style.display = 'block';
+                        this.scatterBtn.style.display = 'block';
+                        // Add K input and run button + preview container
+                        this.fileInfo.insertAdjacentHTML('beforeend', `
+                          <div class="action-buttons" style="margin-top:10px; gap:8px;">
+                            <input id="kInput" type="number" min="1" step="1" placeholder="Enter k" class="btn" style="flex:0 0 140px;" />
+                            
+                            <button class="btn btn-primary" onclick="triggerPCAWithInput('${this.sessionId}', '${data.file_info.filename}')">Run PCA</button>
+                          </div>
+                          <div id="previewContainer" style="margin-top:16px;"></div>
+                        `);
                     } else {
                         this.showStatus('Upload failed: ' + data.error, 'error');
                     }
@@ -564,7 +489,8 @@ function downloadFile(url, filename) {
                         this.uploadedFiles = [];
                         this.fileInfo.classList.remove('show');
                         this.clearBtn.style.display = 'none';
-                        this.nextBtn.style.display = 'none';
+                        this.varianceBtn.style.display = 'none';
+                        this.scatterBtn.style.display = 'none';
                         this.showStatus('Files cleared successfully', 'success');
                         
                         // Create new session
@@ -575,17 +501,89 @@ function downloadFile(url, filename) {
                 }
             }
 
-            proceedToPCA() {
-                this.showStatus('Ready to proceed to PCA module (to be implemented)', 'info');
-                // Integration point for next module
-                console.log('Session ID:', this.sessionId);
-                console.log('Uploaded files:', this.uploadedFiles);
+            async downloadVariance() {
+                const res = await fetch(`/visualize/variance_download?session_id=${this.sessionId}&filename=${encodeURIComponent(this.latestFilename || '')}`);
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'variance_plot.png';
+                a.click();
+            }
+
+            async downloadScatter() {
+                const res = await fetch(`/visualize/scatter_download?session_id=${this.sessionId}&filename=${encodeURIComponent(this.latestFilename || '')}`);
+                const blob = await res.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = 'scatter_plot.png';
+                a.click();
             }
         }
 
         // Initialize the module
         const fileUploadModule = new FileUploadModule();
+
+        async function triggerPCA(sessionId, filename, k) {
+            try {
+                const response = await fetch('/api/pca/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: sessionId, filename: filename, k: k, dataset: !!(document.getElementById('datasetMode') && document.getElementById('datasetMode').checked) })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // Show a manual download button instead of auto-download
+                    const preview = document.getElementById('previewContainer');
+                    const manualDl = `<div class="action-buttons" style="margin-top:10px;"><a class="btn btn-primary" href="${data.download_endpoint}">Download Result</a></div>`;
+                    // Enable plot downloads for this file
+                    fileUploadModule.latestFilename = filename;
+                    fileUploadModule.varianceBtn.disabled = false;
+                    fileUploadModule.scatterBtn.disabled = false;
+                    // Show previews side by side
+                    if (preview) {
+                      if (data.type === 'tabular' && data.preview) {
+                          preview.innerHTML = `
+                            <div style="display:flex; gap:16px; align-items:flex-start;">
+                              <div style="flex:1; overflow:auto; max-width:100%;">
+                                <h3>Original (head)</h3>
+                                ${data.preview.original_head_html}
+                              </div>
+                              <div style="flex:1; overflow:auto; max-width:100%;">
+                                <h3>Transformed (PCs head)</h3>
+                                ${data.preview.transformed_head_html}
+                              </div>
+                            </div>` + manualDl;
+                      } else if (data.type === 'image' && data.preview) {
+                          preview.innerHTML = `
+                            <div style="display:flex; gap:16px; align-items:flex-start;">
+                              <div style="flex:1;">
+                                <h3>Original</h3>
+                                <img src="${data.preview.original_preview_endpoint}" style="max-width:100%; height:auto;" />
+                              </div>
+                              <div style="flex:1;">
+                                <h3>Reconstructed</h3>
+                                <img src="${data.preview.reconstructed_preview_endpoint}" style="max-width:100%; height:auto;" />
+                              </div>
+                            </div>` + manualDl;
+                      }
+                    }
+                } else {
+                    alert('PCA failed: ' + data.error);
+                }
+            } catch (e) {
+                alert('PCA error: ' + e.message);
+            }
+        }
+
+        function triggerPCAWithInput(sessionId, filename) {
+            const kEl = document.getElementById('kInput');
+            const kVal = parseInt(kEl && kEl.value, 10);
+            if (!Number.isInteger(kVal) || kVal <= 0) {
+                alert('Please enter a valid positive integer for k');
+                return;
+            }
+            triggerPCA(sessionId, filename, kVal);
+        }
     </script>
 </body>
 </html>
->>>>>>> c8a06b4896f6b17c2f031465154aa52db814529b

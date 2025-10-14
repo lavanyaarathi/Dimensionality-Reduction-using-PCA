@@ -7,8 +7,9 @@ import os
 # Fix the import to match your actual module name
 from modules.preprocessing import PreprocessingModule
 from modules.session_manager import session_manager
-from modules.upload_handler import FileUploadHandler
+from modules.upload_handler import FileUploadHandler, FileMetadata
 from modules.validators import FileValidator, ValidationFactory
+from utils.cleanup import get_cleanup_status
 
 
 upload_bp = Blueprint('upload', __name__, url_prefix='/api')
