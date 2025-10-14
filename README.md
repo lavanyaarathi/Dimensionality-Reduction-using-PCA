@@ -1,4 +1,18 @@
 # Dimensionality Reduction using PCA
+##1. File Upload Module
+### Module Overview
+Overview
+The File Upload Module provides a robust, secure, and modular system for handling file uploads in the RIDRT application. It supports multiple file formats (CSV, Excel, Images) with comprehensive validation, session management, and automatic cleanup.
+### Key Features
+✅ Multi-Format Support - CSV, Excel (XLSX/XLS), Images (JPG/PNG)
+✅ Comprehensive Validation - File type, size, content, and structure validation
+✅ Session Management - Isolated user sessions with automatic cleanup
+✅ Security - Filename sanitization, size limits, extension validation
+✅ Modular Architecture - Easy to extend and maintain
+✅ RESTful API - Clean API endpoints for all operations
+✅ Background Cleanup - Automatic deletion of expired sessions
+
+
 ## 1. PCA Visualization & Download Modules
 
 ### Module Overview
