@@ -1,0 +1,22 @@
+@echo off
+echo Starting PCA Project...
+
+echo.
+echo Starting Backend Server...
+start "Backend Server" cmd /k "cd backend && call venv\Scripts\activate.bat && py app.py"
+
+echo.
+echo Waiting for backend to start...
+timeout /t 5 /nobreak > nul
+
+echo.
+echo Starting Frontend Server...
+start "Frontend Server" cmd /k "cd frontend && npm start"
+
+echo.
+echo Both servers are starting...
+echo Backend: http://localhost:5000
+echo Frontend: http://localhost:3000
+echo.
+echo Press any key to exit...
+pause > nul
