@@ -1,0 +1,9 @@
+@echo off
+echo Starting PCA Frontend...
+echo.
+echo Installing dependencies...
+npm install
+echo.
+echo Starting React development server...
+npm start
+pause

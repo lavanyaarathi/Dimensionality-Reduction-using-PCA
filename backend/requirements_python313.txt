@@ -1,0 +1,17 @@
+# Python 3.13 Compatible Requirements
+# Use this file if you're using Python 3.13
+
+Flask>=3.0.0
+Flask-CORS>=4.0.0
+PyJWT>=2.8.0
+python-dotenv>=1.0.0
+Werkzeug>=3.0.1
+numpy>=1.26.0
+pandas>=2.1.0
+scikit-learn>=1.4.0
+matplotlib>=3.8.0
+Pillow>=10.2.0
+openpyxl>=3.1.2
+plotly>=5.18.0
+setuptools>=69.0.0
+wheel>=0.42.0
