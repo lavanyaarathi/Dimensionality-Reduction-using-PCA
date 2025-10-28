@@ -9,6 +9,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Logo from './Logo';
 import ProfileDropdown from './ProfileDropdown';
 import Footer from './Footer';
+const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const UploadPage = () => {
   const [theme] = useState('space');
@@ -28,7 +29,8 @@ const UploadPage = () => {
   const createSession = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/session/create', {
+      const response = await const BASE_URL = process.env.REACT_APP_API_URL;
+fetch(`${BASE_URL}/api/session/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -650,5 +652,6 @@ const UploadPage = () => {
     </div>
   );
 };
+
 
 export default UploadPage;
