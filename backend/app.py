@@ -36,7 +36,8 @@ CORS(
     resources={r"/api/*": {"origins": [
         "http://localhost:3000",
         "http://localhost:3001",
-        "http://192.168.0.100:3001"
+        "http://192.168.0.100:3001",
+        "https://dimensionality-reduction-using-pca.vercel.app/"
     ]}},
     supports_credentials=True,
     methods=["GET", "POST", "DELETE", "OPTIONS"],
