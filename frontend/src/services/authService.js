@@ -22,9 +22,8 @@ class AuthService {
         localStorage.setItem('token', data.token);
         localStorage.setItem('username', data.username);
         return { success: true, data };
-      } else {
-        return { success: false, message: data.message };
       }
+      return { success: false, message: data.message };
     } catch (error) {
       return { success: false, message: 'Network error. Please try again.' };
     }
@@ -44,9 +43,8 @@ class AuthService {
 
       if (response.ok) {
         return { success: true, data };
-      } else {
-        return { success: false, message: data.message };
       }
+      return { success: false, message: data.message };
     } catch (error) {
       return { success: false, message: 'Network error. Please try again.' };
     }
@@ -54,12 +52,12 @@ class AuthService {
 
   async logout() {
     const token = this.getToken();
-    
+
     try {
       await fetch(`${API_BASE_URL}/logout`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
     } catch (error) {
@@ -72,14 +70,14 @@ class AuthService {
 
   async verifyToken() {
     const token = this.getToken();
-    
+
     if (!token) return false;
 
     try {
       const response = await fetch(`${API_BASE_URL}/verify`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
