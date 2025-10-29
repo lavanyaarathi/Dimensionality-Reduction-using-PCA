@@ -3,7 +3,7 @@
  * Handles user login, registration, and token management.
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 class AuthService {
   async login(username, password) {
@@ -105,3 +105,4 @@ class AuthService {
 const authService = new AuthService();
 
 export default authService;
+
