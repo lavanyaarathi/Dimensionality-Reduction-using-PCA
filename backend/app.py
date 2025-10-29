@@ -1,6 +1,6 @@
 """
 Main Flask Application for PCA Dimensionality Reduction Project.
-FIXED: Now generates variance plots and scatter plots for image PCA
+FIXED: CORS, error handling, and security improvements
 """
 
 from flask import Flask, request, jsonify, send_file
@@ -31,21 +31,24 @@ from pca_results.pca_computation import run_pca_svd
 load_dotenv()
 
 app = Flask(__name__)
+
+# FIXED: Dynamic CORS configuration
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001').split(',')
+
 CORS(
     app,
-    resources={r"/*": {"origins": [
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "https://dimensionality-reduction-using-pca.vercel.app",
-        "https://dimensionality-reduction-git-2b04fd-lavanya-s-projects-ddc4370c.vercel.app"
-    ]}},
+    resources={r"/*": {"origins": ALLOWED_ORIGINS}},
     supports_credentials=True,
     methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"]
 )
 
+# FIXED: Require SECRET_KEY in production
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError("SECRET_KEY environment variable must be set!")
 
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-change-in-production')
+app.config['SECRET_KEY'] = SECRET_KEY
 app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'temp_uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 
@@ -80,6 +83,9 @@ def token_required(f):
             return jsonify({'message': 'Token has expired!'}), 401
         except jwt.InvalidTokenError:
             return jsonify({'message': 'Invalid token!'}), 401
+        except Exception as e:
+            print(f"Token validation error: {e}")
+            return jsonify({'message': 'Token validation failed!'}), 401
         
         return f(current_user, *args, **kwargs)
     
@@ -203,55 +209,63 @@ def generate_scatter_plot(pca_output, k_used, session_dir, base_filename):
 # AUTHENTICATION ENDPOINTS
 @app.route('/api/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    
-    if not data or not data.get('username') or not data.get('password'):
-        return jsonify({'message': 'Username and password required!'}), 400
-    
-    username = data['username']
-    password = data['password']
-    
-    if username in users and check_password_hash(users[username], password):
-        token = jwt.encode({
-            'username': username,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
-        }, app.config['SECRET_KEY'], algorithm='HS256')
+    try:
+        data = request.get_json()
         
-        return jsonify({
-            'message': 'Login successful!',
-            'token': token,
-            'username': username
-        }), 200
-    
-    return jsonify({'message': 'Invalid username or password!'}), 401
+        if not data or not data.get('username') or not data.get('password'):
+            return jsonify({'message': 'Username and password required!'}), 400
+        
+        username = data['username']
+        password = data['password']
+        
+        if username in users and check_password_hash(users[username], password):
+            token = jwt.encode({
+                'username': username,
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=24)
+            }, app.config['SECRET_KEY'], algorithm='HS256')
+            
+            return jsonify({
+                'message': 'Login successful!',
+                'token': token,
+                'username': username
+            }), 200
+        
+        return jsonify({'message': 'Invalid username or password!'}), 401
+    except Exception as e:
+        print(f"Login error: {e}")
+        return jsonify({'message': 'An error occurred during login'}), 500
 
 @app.route('/api/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    
-    if not data or not data.get('username') or not data.get('email') or not data.get('password'):
-        return jsonify({'message': 'Username, email, and password required!'}), 400
-    
-    username = data['username']
-    email = data['email']
-    password = data['password']
-    
-    # Check if user already exists
-    if username in users:
-        return jsonify({'message': 'Username already exists!'}), 400
-    
-    # Validate password length
-    if len(password) < 6:
-        return jsonify({'message': 'Password must be at least 6 characters!'}), 400
-    
-    # Add new user (in-memory storage)
-    users[username] = generate_password_hash(password)
-    
-    return jsonify({
-        'message': 'User registered successfully!',
-        'username': username,
-        'email': email
-    }), 201
+    try:
+        data = request.get_json()
+        
+        if not data or not data.get('username') or not data.get('email') or not data.get('password'):
+            return jsonify({'message': 'Username, email, and password required!'}), 400
+        
+        username = data['username']
+        email = data['email']
+        password = data['password']
+        
+        # Check if user already exists
+        if username in users:
+            return jsonify({'message': 'Username already exists!'}), 400
+        
+        # Validate password length
+        if len(password) < 6:
+            return jsonify({'message': 'Password must be at least 6 characters!'}), 400
+        
+        # Add new user (in-memory storage)
+        users[username] = generate_password_hash(password)
+        
+        return jsonify({
+            'message': 'User registered successfully!',
+            'username': username,
+            'email': email
+        }), 201
+    except Exception as e:
+        print(f"Registration error: {e}")
+        return jsonify({'message': 'An error occurred during registration'}), 500
 
 @app.route('/api/verify', methods=['GET'])
 @token_required
@@ -280,6 +294,7 @@ def create_session(current_user):
             'message': 'Session created successfully'
         }), 201
     except Exception as e:
+        print(f"Session creation error: {e}")
         return jsonify({
             'success': False,
             'error': f'Failed to create session: {str(e)}'
@@ -289,23 +304,30 @@ def create_session(current_user):
 @token_required
 def delete_session(current_user, session_id):
     """Delete a session and all its files"""
-    if not session_manager.session_exists(session_id):
+    try:
+        if not session_manager.session_exists(session_id):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid or expired session'
+            }), 404
+        
+        success = session_manager.delete_session(session_id)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Session and all files deleted successfully'
+            }), 200
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to delete session'
+            }), 500
+    except Exception as e:
+        print(f"Session deletion error: {e}")
         return jsonify({
             'success': False,
-            'error': 'Invalid or expired session'
-        }), 404
-    
-    success = session_manager.delete_session(session_id)
-    
-    if success:
-        return jsonify({
-            'success': True,
-            'message': 'Session and all files deleted successfully'
-        }), 200
-    else:
-        return jsonify({
-            'success': False,
-            'error': 'Failed to delete session'
+            'error': 'An error occurred while deleting session'
         }), 500
 
 # FILE UPLOAD ENDPOINTS
@@ -313,80 +335,87 @@ def delete_session(current_user, session_id):
 @token_required
 def upload_file(current_user):
     """Handle file upload"""
-    # Validate session_id
-    session_id = request.form.get('session_id')
-    if not session_id:
+    try:
+        # Validate session_id
+        session_id = request.form.get('session_id')
+        if not session_id:
+            return jsonify({
+                'success': False,
+                'error': 'session_id is required'
+            }), 400
+        
+        if not session_manager.session_exists(session_id):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid or expired session_id'
+            }), 400
+        
+        # Validate file presence
+        if 'file' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided in request'
+            }), 400
+        
+        file = request.files['file']
+        
+        # Check if filename is empty
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        # Validate file extension
+        if not FileValidator.allowed_file(file.filename):
+            return jsonify({
+                'success': False,
+                'error': 'File type not allowed. Supported: CSV, XLSX, XLS, JPG, PNG'
+            }), 400
+        
+        # Process upload
+        file_info, message = FileUploadHandler.process_upload(file, session_id)
+        
+        if file_info is None:
+            return jsonify({
+                'success': False,
+                'error': message
+            }), 400
+        
+        return jsonify({
+            'success': True,
+            'message': message,
+            'file_info': FileMetadata.to_response_format(file_info)
+        }), 200
+    except Exception as e:
+        print(f"Upload error: {e}")
         return jsonify({
             'success': False,
-            'error': 'session_id is required'
-        }), 400
-    
-    if not session_manager.session_exists(session_id):
-        return jsonify({
-            'success': False,
-            'error': 'Invalid or expired session_id'
-        }), 400
-    
-    # Validate file presence
-    if 'file' not in request.files:
-        return jsonify({
-            'success': False,
-            'error': 'No file provided in request'
-        }), 400
-    
-    file = request.files['file']
-    
-    # Check if filename is empty
-    if file.filename == '':
-        return jsonify({
-            'success': False,
-            'error': 'No file selected'
-        }), 400
-    
-    # Validate file extension
-    if not FileValidator.allowed_file(file.filename):
-        return jsonify({
-            'success': False,
-            'error': 'File type not allowed. Supported: CSV, XLSX, XLS, JPG, PNG'
-        }), 400
-    
-    # Process upload
-    file_info, message = FileUploadHandler.process_upload(file, session_id)
-    
-    if file_info is None:
-        return jsonify({
-            'success': False,
-            'error': message
-        }), 400
-    
-    return jsonify({
-        'success': True,
-        'message': message,
-        'file_info': FileMetadata.to_response_format(file_info)
-    }), 200
+            'error': 'An error occurred during file upload'
+        }), 500
 
 # PCA COMPUTATION ENDPOINTS
 @app.route('/api/pca/run', methods=['POST'])
 @token_required
 def run_pca_endpoint(current_user):
-    """Run PCA on uploaded file - FIXED VERSION WITH PLOTS"""
-    data = request.get_json(silent=True) or {}
-    session_id = data.get('session_id')
-    filename = data.get('filename')
-    k = data.get('k')
-    variance_threshold = data.get('variance_threshold')
-
-    if not session_id or not filename:
-        return jsonify({'success': False, 'error': 'session_id and filename are required'}), 400
-
-    filepath = FileUploadHandler.get_file_path(session_id, filename)
-    if not filepath:
-        return jsonify({'success': False, 'error': 'File not found for given session'}), 404
-
-    file_type = FileValidator.get_file_type(filename)
-    base_filename = os.path.splitext(filename)[0]
-    
+    """Run PCA on uploaded file"""
     try:
+        data = request.get_json(silent=True) or {}
+        session_id = data.get('session_id')
+        filename = data.get('filename')
+        k = data.get('k')
+        variance_threshold = data.get('variance_threshold')
+
+        if not session_id or not filename:
+            return jsonify({'success': False, 'error': 'session_id and filename are required'}), 400
+
+        filepath = FileUploadHandler.get_file_path(session_id, filename)
+        if not filepath:
+            return jsonify({'success': False, 'error': 'File not found for given session'}), 404
+
+        file_type = FileValidator.get_file_type(filename)
+        base_filename = os.path.splitext(filename)[0]
+        
         if file_type == 'tabular':
             df = pd.read_csv(filepath) if filename.lower().endswith('.csv') else pd.read_excel(filepath)
             
@@ -433,6 +462,7 @@ def run_pca_endpoint(current_user):
             print(f"Original data shape: {original_shape}")
             print(f"Numeric columns used: {list(numeric_df.columns)}")
             print(f"Final data matrix shape: {data_matrix.shape}")
+            
             # Validate k
             if k is None and variance_threshold is None:
                 return jsonify({'success': False, 'error': 'Provide k or variance_threshold'}), 400
@@ -443,6 +473,7 @@ def run_pca_endpoint(current_user):
                     return jsonify({'success': False, 'error': 'k must be an integer'}), 400
                 if k <= 0 or k > n_features:
                     return jsonify({'success': False, 'error': f'k must be between 1 and {n_features}'}), 400
+            
             mean_vec = np.mean(data_matrix, axis=0)
             data_centered = data_matrix - mean_vec
             pca_output, eigenpairs = run_pca_svd(data_centered, k=k, variance_threshold=variance_threshold)
@@ -450,9 +481,11 @@ def run_pca_endpoint(current_user):
             eigenvectors_k = eigenpairs['eigenvectors'][:, :k_used]
             reconstructed_centered = np.dot(pca_output, eigenvectors_k.T)
             reconstructed = reconstructed_centered + mean_vec
+            
             # Build transformed lower-dimensional dataset
             pc_cols = [f'PC{i+1}' for i in range(k_used)]
             transformed_df = pd.DataFrame(pca_output, columns=pc_cols, index=numeric_df.index)
+            
             # Save transformed dataset
             session_dir = os.path.dirname(filepath)
             out_name = f"pca_transformed_{base_filename}.csv"
@@ -466,6 +499,7 @@ def run_pca_endpoint(current_user):
             # Build preview tables
             original_head_html = numeric_df.head().to_html(classes="data-table")
             transformed_head_html = transformed_df.head().to_html(classes="data-table")
+            
             # Store PCA summary
             session = session_manager.get_session(session_id)
             if session:
@@ -504,6 +538,7 @@ def run_pca_endpoint(current_user):
             img = Image.open(filepath).convert('RGB')
             img_array = np.asarray(img, dtype=float)
             h, w, c = img_array.shape
+            
             if k is None and variance_threshold is None:
                 return jsonify({'success': False, 'error': 'Provide k or variance_threshold'}), 400
             if k is not None:
@@ -513,6 +548,7 @@ def run_pca_endpoint(current_user):
                     return jsonify({'success': False, 'error': 'k must be an integer'}), 400
                 if k <= 0 or k > c:
                     return jsonify({'success': False, 'error': f'k must be between 1 and {c} for images'}), 400
+            
             flat = img_array.reshape(-1, c)
             mean_vec = np.mean(flat, axis=0)
             data_centered = flat - mean_vec
@@ -523,6 +559,7 @@ def run_pca_endpoint(current_user):
             reconstructed = reconstructed_centered + mean_vec
             recon_img = np.clip(reconstructed.reshape(h, w, c), 0, 255).astype(np.uint8)
             recon_pil = Image.fromarray(recon_img)
+            
             session_dir = os.path.dirname(filepath)
             recon_name = f"reconstructed_{base_filename}.png"
             recon_path = os.path.join(session_dir, recon_name)
@@ -575,77 +612,82 @@ def run_pca_endpoint(current_user):
 @token_required
 def download_reconstructed(current_user):
     """Download PCA results"""
-    session_id = request.args.get('session_id')
-    outfile = request.args.get('outfile')
-    if not session_id or not outfile:
-        return jsonify({'success': False, 'error': 'session_id and outfile are required'}), 400
-    
-    session_dir = os.path.join(app.config['UPLOAD_FOLDER'], session_id)
-    full_path = os.path.join(session_dir, outfile)
-    
-    if not os.path.exists(full_path):
-        print(f"Download file not found: {full_path}")
-        return jsonify({'success': False, 'error': f'Output file not found: {outfile}'}), 404
-    
-    # Determine MIME type
-    ext = os.path.splitext(outfile)[1].lower()
-    if ext == '.csv':
-        mime = 'text/csv'
-    elif ext in ['.png', '.jpg', '.jpeg']:
-        mime = 'image/png' if ext == '.png' else 'image/jpeg'
-    else:
-        mime = 'application/octet-stream'
-    
-    return send_file(full_path, mimetype=mime, as_attachment=True, download_name=outfile)
+    try:
+        session_id = request.args.get('session_id')
+        outfile = request.args.get('outfile')
+        
+        if not session_id or not outfile:
+            return jsonify({'success': False, 'error': 'session_id and outfile are required'}), 400
+        
+        session_dir = os.path.join(app.config['UPLOAD_FOLDER'], session_id)
+        full_path = os.path.join(session_dir, outfile)
+        
+        if not os.path.exists(full_path):
+            print(f"Download file not found: {full_path}")
+            return jsonify({'success': False, 'error': f'Output file not found: {outfile}'}), 404
+        
+        # Determine MIME type
+        ext = os.path.splitext(outfile)[1].lower()
+        if ext == '.csv':
+            mime = 'text/csv'
+        elif ext in ['.png', '.jpg', '.jpeg']:
+            mime = 'image/png' if ext == '.png' else 'image/jpeg'
+        else:
+            mime = 'application/octet-stream'
+        
+        return send_file(full_path, mimetype=mime, as_attachment=True, download_name=outfile)
+    except Exception as e:
+        print(f"Download error: {e}")
+        return jsonify({'success': False, 'error': 'An error occurred during download'}), 500
 
 @app.route('/api/pca/preview_image', methods=['GET'])
 def preview_image():
     """Preview image files - NO AUTH REQUIRED for img tags to work"""
-    session_id = request.args.get('session_id')
-    filename = request.args.get('filename')
-    
-    if not session_id or not filename:
-        return jsonify({'success': False, 'error': 'session_id and filename are required'}), 400
-    
-    # Validate session exists (security check without token)
-    if not session_manager.session_exists(session_id):
-        return jsonify({'success': False, 'error': 'Invalid session'}), 404
-    
-    session_dir = os.path.join(app.config['UPLOAD_FOLDER'], session_id)
-    
-    # Try with original filename first
-    full_path = os.path.join(session_dir, filename)
-    
-    # If not found, try URL decoding
-    if not os.path.exists(full_path):
-        try:
-            from urllib.parse import unquote
-            decoded = unquote(filename)
-            full_path = os.path.join(session_dir, decoded)
-        except Exception as e:
-            print(f"Error decoding filename: {e}")
-    
-    # Check if file exists
-    if not os.path.exists(full_path):
-        print(f"File not found: {full_path}")
-        print(f"Session dir contents: {os.listdir(session_dir) if os.path.exists(session_dir) else 'Dir not found'}")
-        return jsonify({'success': False, 'error': f'File not found: {filename}'}), 404
-    
-    # Determine MIME type
-    ext = os.path.splitext(full_path)[1].lower()
-    mime_types = {
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.gif': 'image/gif'
-    }
-    mime = mime_types.get(ext, 'application/octet-stream')
-    
     try:
+        session_id = request.args.get('session_id')
+        filename = request.args.get('filename')
+        
+        if not session_id or not filename:
+            return jsonify({'success': False, 'error': 'session_id and filename are required'}), 400
+        
+        # Validate session exists (security check without token)
+        if not session_manager.session_exists(session_id):
+            return jsonify({'success': False, 'error': 'Invalid session'}), 404
+        
+        session_dir = os.path.join(app.config['UPLOAD_FOLDER'], session_id)
+        
+        # Try with original filename first
+        full_path = os.path.join(session_dir, filename)
+        
+        # If not found, try URL decoding
+        if not os.path.exists(full_path):
+            try:
+                from urllib.parse import unquote
+                decoded = unquote(filename)
+                full_path = os.path.join(session_dir, decoded)
+            except Exception as e:
+                print(f"Error decoding filename: {e}")
+        
+        # Check if file exists
+        if not os.path.exists(full_path):
+            print(f"File not found: {full_path}")
+            print(f"Session dir contents: {os.listdir(session_dir) if os.path.exists(session_dir) else 'Dir not found'}")
+            return jsonify({'success': False, 'error': f'File not found: {filename}'}), 404
+        
+        # Determine MIME type
+        ext = os.path.splitext(full_path)[1].lower()
+        mime_types = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.gif': 'image/gif'
+        }
+        mime = mime_types.get(ext, 'application/octet-stream')
+        
         return send_file(full_path, mimetype=mime, as_attachment=False)
     except Exception as e:
-        print(f"Error sending file: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        print(f"Preview error: {e}")
+        return jsonify({'success': False, 'error': 'An error occurred during preview'}), 500
 
 # HEALTH CHECK
 @app.route('/api/health', methods=['GET'])
@@ -656,6 +698,22 @@ def health_check():
         'active_sessions': session_manager.get_session_count()
     }), 200
 
+# FIXED: Add error handler for large files
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    return jsonify({
+        'success': False,
+        'error': 'File too large. Maximum size is 16MB.'
+    }), 413
+
+# FIXED: Add error handler for 500 errors
+@app.errorhandler(500)
+def internal_server_error(error):
+    return jsonify({
+        'success': False,
+        'error': 'Internal server error occurred'
+    }), 500
+
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Render sets PORT automatically
-    app.run(host="0.0.0.0", port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
