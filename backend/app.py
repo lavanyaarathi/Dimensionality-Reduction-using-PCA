@@ -45,6 +45,71 @@ CORS(
     max_age=600
 )
 
+# Add handlers for direct paths
+@app.route('/register', methods=['OPTIONS', 'POST'])
+def register_redirect():
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'POST':
+        return register()
+
+@app.route('/login', methods=['OPTIONS', 'POST'])
+def login_redirect():
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'POST':
+        return login()
+        
+@app.route('/logout', methods=['OPTIONS', 'POST'])
+def logout_redirect():
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'POST':
+        return logout()
+        
+@app.route('/verify', methods=['OPTIONS', 'GET'])
+def verify_redirect():
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'GET':
+        return verify_token()
+        
+@app.route('/session/create', methods=['OPTIONS', 'POST'])
+def session_create_redirect():
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'POST':
+        return create_session()
+        
+@app.route('/upload', methods=['OPTIONS', 'POST'])
+def upload_redirect():
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'POST':
+        return upload_file()
+        
+@app.route('/pca/run', methods=['OPTIONS', 'POST'])
+def pca_run_redirect():
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'POST':
+        return run_pca()
+        
+@app.route('/session/<session_id>', methods=['OPTIONS', 'DELETE'])
+def session_delete_redirect(session_id):
+    if request.method == 'OPTIONS':
+        response = app.make_default_options_response()
+        return response
+    elif request.method == 'DELETE':
+        return delete_session(session_id)
+
 # FIXED: Require SECRET_KEY in production
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:

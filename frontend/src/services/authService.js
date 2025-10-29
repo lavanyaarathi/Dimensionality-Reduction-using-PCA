@@ -8,9 +8,9 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 class AuthService {
   async login(username, password) {
     try {
-      console.log(`Attempting login to: ${API_BASE_URL}/api/login`);
+      console.log(`Attempting login to: ${API_BASE_URL}/login`);
       
-      const response = await fetch(`${API_BASE_URL}/api/login`, {
+      const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -38,9 +38,9 @@ class AuthService {
 
   async register(username, email, password) {
     try {
-      console.log(`Attempting registration to: ${API_BASE_URL}/api/register`);
+      console.log(`Attempting registration to: ${API_BASE_URL}/register`);
       
-      const response = await fetch(`${API_BASE_URL}/api/register`, {
+      const response = await fetch(`${API_BASE_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ class AuthService {
     
     try {
       console.log('Logging out...');
-      await fetch(`${API_BASE_URL}/api/logout`, {
+      await fetch(`${API_BASE_URL}/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -95,7 +95,7 @@ class AuthService {
 
     try {
       console.log('Verifying token...');
-      const response = await fetch(`${API_BASE_URL}/api/verify`, {
+      const response = await fetch(`${API_BASE_URL}/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -29,14 +29,17 @@ const UploadPage = () => {
 
   const createSession = async () => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/session/create`, {
+      
+      const response = await fetch(`${BASE_URL}/session/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         credentials: 'include',
+        body: JSON.stringify({})
       });
       const data = await response.json();
 
@@ -70,11 +73,11 @@ const UploadPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/upload`, {
+     const response = await fetch(`${BASE_URL}/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         credentials: 'include',
-        body: formData,
+        body: formData
       });
 
       const data = await response.json();
@@ -133,7 +136,7 @@ const UploadPage = () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/pca/run`, {
+      const response = await fetch(`${BASE_URL}/pca/run`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -208,9 +211,10 @@ const UploadPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      await fetch(`${BASE_URL}/api/session/${sessionId}`, {
+      await fetch(`${BASE_URL}/session/${sessionId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
 
       setUploadedFiles([]);
