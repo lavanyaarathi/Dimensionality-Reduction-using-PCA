@@ -33,11 +33,11 @@ load_dotenv()
 app = Flask(__name__)
 
 # FIXED: Dynamic CORS configuration
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:3001').split(',')
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '*').split(',')
 
 CORS(
     app,
-    resources={r"/*": {"origins": ALLOWED_ORIGINS}},
+    resources={r"/*": {"origins": "*"}},
     supports_credentials=True,
     methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization"],
