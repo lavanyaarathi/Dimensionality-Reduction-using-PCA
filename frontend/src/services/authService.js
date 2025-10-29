@@ -2,6 +2,7 @@
  * Authentication service for PCA project.
  * Handles user login, registration, and token management.
  */
+console.log("Backend API:", process.env.REACT_APP_API_URL);
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -105,4 +106,5 @@ class AuthService {
 const authService = new AuthService();
 
 export default authService;
+
 
