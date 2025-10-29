@@ -3,7 +3,6 @@
  * Handles user login, registration, and token management.
  */
 console.log("Backend API:", process.env.REACT_APP_API_URL);
-
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 class AuthService {
@@ -27,6 +26,7 @@ class AuthService {
         return { success: false, message: data.message };
       }
     } catch (error) {
+      console.error('Login error:', error);
       return { success: false, message: 'Network error. Please try again.' };
     }
   }
@@ -49,6 +49,7 @@ class AuthService {
         return { success: false, message: data.message };
       }
     } catch (error) {
+      console.error('Register error:', error);
       return { success: false, message: 'Network error. Please try again.' };
     }
   }
@@ -86,6 +87,7 @@ class AuthService {
 
       return response.ok;
     } catch (error) {
+      console.error('Token verification error:', error);
       return false;
     }
   }
@@ -104,7 +106,4 @@ class AuthService {
 }
 
 const authService = new AuthService();
-
 export default authService;
-
-
