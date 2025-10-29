@@ -84,7 +84,33 @@ def session_create_redirect():
         response = app.make_default_options_response()
         return response
     elif request.method == 'POST':
-        return create_session()
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        
+        try:
+            if token.startswith('Bearer '):
+                token = token[7:]
+            
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = data['username']
+            
+            # Create session after token validation
+            session_id = session_manager.create_session()
+            return jsonify({
+                'success': True,
+                'session_id': session_id,
+                'message': 'Session created successfully'
+            }), 201
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 401
+        except Exception as e:
+            print(f"Session creation error: {e}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to create session: {str(e)}'
+            }), 500
         
 @app.route('/upload', methods=['OPTIONS', 'POST'])
 def upload_redirect():
@@ -92,7 +118,39 @@ def upload_redirect():
         response = app.make_default_options_response()
         return response
     elif request.method == 'POST':
-        return upload_file()
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        
+        try:
+            if token.startswith('Bearer '):
+                token = token[7:]
+            
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = data['username']
+            
+            # Process file upload after token validation
+            if 'file' not in request.files:
+                return jsonify({'success': False, 'error': 'No file part'}), 400
+                
+            file = request.files['file']
+            session_id = request.form.get('session_id')
+            
+            if not file.filename or not session_id:
+                return jsonify({'success': False, 'error': 'Missing filename or session ID'}), 400
+                
+            # Process the file upload
+            result = FileUploadHandler.handle_upload(file, session_id, app.config['UPLOAD_FOLDER'])
+            return jsonify(result), 200 if result['success'] else 400
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 401
+        except Exception as e:
+            print(f"Upload error: {e}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to upload file: {str(e)}'
+            }), 500
         
 @app.route('/pca/run', methods=['OPTIONS', 'POST'])
 def pca_run_redirect():
@@ -100,7 +158,38 @@ def pca_run_redirect():
         response = app.make_default_options_response()
         return response
     elif request.method == 'POST':
-        return run_pca()
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        
+        try:
+            if token.startswith('Bearer '):
+                token = token[7:]
+            
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = data['username']
+            
+            # Process PCA request after token validation
+            data = request.get_json()
+            if not data or not data.get('session_id') or not data.get('filename') or 'k' not in data:
+                return jsonify({'success': False, 'error': 'Missing required parameters'}), 400
+                
+            session_id = data['session_id']
+            filename = data['filename']
+            k = data['k']
+            
+            # Run PCA computation
+            result = run_pca_svd(session_id, filename, k, app.config['UPLOAD_FOLDER'])
+            return jsonify(result), 200 if result['success'] else 400
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 401
+        except Exception as e:
+            print(f"PCA computation error: {e}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to run PCA: {str(e)}'
+            }), 500
         
 @app.route('/session/<session_id>', methods=['OPTIONS', 'DELETE'])
 def session_delete_redirect(session_id):
@@ -108,7 +197,38 @@ def session_delete_redirect(session_id):
         response = app.make_default_options_response()
         return response
     elif request.method == 'DELETE':
-        return delete_session(session_id)
+        token = request.headers.get('Authorization')
+        
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+        
+        try:
+            if token.startswith('Bearer '):
+                token = token[7:]
+            
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            current_user = data['username']
+            
+            # Delete session after token validation
+            try:
+                session_manager.delete_session(session_id)
+                return jsonify({
+                    'success': True,
+                    'message': f'Session {session_id} deleted successfully'
+                }), 200
+            except Exception as e:
+                return jsonify({
+                    'success': False,
+                    'error': f'Failed to delete session: {str(e)}'
+                }), 500
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired!'}), 401
+        except Exception as e:
+            print(f"Session deletion error: {e}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to delete session: {str(e)}'
+            }), 500
 
 # FIXED: Require SECRET_KEY in production
 SECRET_KEY = os.getenv('SECRET_KEY')
