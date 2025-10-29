@@ -15,6 +15,7 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
 
@@ -44,6 +45,7 @@ class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ username, email, password }),
       });
 
@@ -72,6 +74,7 @@ class AuthService {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
     } catch (error) {
       console.error('Logout error:', error);
@@ -97,6 +100,7 @@ class AuthService {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
+        credentials: 'include',
       });
 
       const isValid = response.ok;

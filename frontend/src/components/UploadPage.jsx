@@ -36,6 +36,7 @@ const UploadPage = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
       });
       const data = await response.json();
 
@@ -72,6 +73,7 @@ const UploadPage = () => {
       const response = await fetch(`${BASE_URL}/api/upload`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
         body: formData,
       });
 
@@ -137,6 +139,7 @@ const UploadPage = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ session_id: sessionId, filename, k: parseInt(k) }),
       });
 

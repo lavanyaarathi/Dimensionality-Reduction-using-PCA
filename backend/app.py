@@ -40,7 +40,9 @@ CORS(
     resources={r"/*": {"origins": ALLOWED_ORIGINS}},
     supports_credentials=True,
     methods=["GET", "POST", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"]
+    allow_headers=["Content-Type", "Authorization"],
+    expose_headers=["Content-Type", "Authorization"],
+    max_age=600
 )
 
 # FIXED: Require SECRET_KEY in production
